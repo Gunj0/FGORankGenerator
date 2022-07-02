@@ -1,0 +1,56 @@
+html {
+  font-size: 16px;
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+div {
+  margin: 0 auto;
+}
+
+a {
+  line-height: 1.5em;
+}
+
+.message {
+  padding: 0 0 0 20px;
+}
+
+.button {
+  text-align: center;
+}
+
+.main {
+  width: 100%;
+  margin: 30px auto;
+}
+.twitter {
+  width: 100%;
+  margin: 30px auto;
+}
+
+@media screen and (min-width: 481px) {
+  .main {
+    width: 80%;
+    margin: 30px auto;
+  }
+  .twitter {
+    width: 80%;
+    margin: 30px auto;
+  }
+}
+
+@media screen and (min-width: 960px) {
+  .main {
+    width: 60%;
+    margin: 30px auto;
+  }
+  .twitter {
+    width: 40%;
+    margin: 30px auto;
+  }
+}

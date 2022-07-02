@@ -1,0 +1,24 @@
+﻿@{
+  ViewData["Title"] = "HOME";
+}
+
+<div class="main">
+  <ul>
+    <li>
+      <a href="https://appmedia.jp/fategrandorder/1351236" target="_blank">AppMedia -最強サーヴァントランキングまとめ-</a>
+    </li>
+    <li>
+      <a href="https://gamewith.jp/fgo/article/show/62409" target="_blank">Gamewith -検証勢が考えたサーヴァントランキング-</a>
+    </li>
+  </ul>
+  <p class="message">
+    から、現時点の各サーヴァント評価まとめを生成します。
+  </p>
+</div>
+
+<div class="button">
+  @using (Html.BeginForm("CsvDownload", "Home", FormMethod.Get))
+  {
+    <button class="btn btn-primary" value="download" name="download" type="submit">CSVダウンロード</button>
+  }
+</div>

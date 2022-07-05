@@ -2,6 +2,9 @@
 
 namespace FGORankGenerator.Models
 {
+  /// <summary>
+  /// リストからCSVを生成
+  /// </summary>
   public static class CsvWriter
   {
     public static string CreateCsv(List<ServantModel> servantList)
@@ -18,9 +21,14 @@ namespace FGORankGenerator.Models
     }
 
     private static string[] headerArray
-      = { "Id", "Name", "Rarity", "Class", "Type", "Range",
-      "GameWithRank", "AppMediaRate", "AppMediaOrbit" };
+      = { "Id", "鯖名", "星", "クラス", "タイプ", "範囲",
+      "GameWith総合", "AppMedia攻略", "AppMedia周回" };
 
+    /// <summary>
+    /// csvのheaderを生成
+    /// </summary>
+    /// <param name="headerArray"></param>
+    /// <returns></returns>
     private static string CreateCsvHeader(string[] headerArray)
     {
       var sb = new StringBuilder();
@@ -33,6 +41,11 @@ namespace FGORankGenerator.Models
       return sb.Remove(sb.Length - 1, 1).ToString();
     }
 
+    /// <summary>
+    /// csvのbodyを生成
+    /// </summary>
+    /// <param name="servant"></param>
+    /// <returns></returns>
     private static string CreateCsvBody(ServantModel servant)
     {
       var sb = new StringBuilder();

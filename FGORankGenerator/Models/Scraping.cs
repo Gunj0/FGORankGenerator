@@ -11,6 +11,9 @@ namespace FGORankGenerator.Models
     // GameWith URL
     private const string gameWithURL = "https://gamewith.jp/fgo/article/show/62409";
 
+    // HttpClientは使い回さなければいけないらしい
+    private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(10)};
+
     /// <summary>
     /// スクレイピングで得た各サーヴァント評価リストを返します。
     /// </summary>
@@ -20,7 +23,7 @@ namespace FGORankGenerator.Models
       var servantList = new List<ServantModel>();
 
       // AppMediaのHTML解析
-      IHtmlDocument? appMediaDoc = GetParseHtml(appMediaURL);
+      IHtmlDocument? appMediaDoc = GetParseHtml(appMediaURL).Result;
 
       if (appMediaDoc != null)
       {
@@ -74,7 +77,7 @@ namespace FGORankGenerator.Models
         };
 
         // GamewithのHTML解析
-        IHtmlDocument? gameWithDoc = GetParseHtml(gameWithURL);
+        IHtmlDocument? gameWithDoc = GetParseHtml(gameWithURL).Result;
 
         // Gamewith評価取得
         if (gameWithDoc != null)
@@ -147,22 +150,21 @@ namespace FGORankGenerator.Models
     /// </summary>
     /// <param name="url">解析したいURL</param>
     /// <returns>解析済みドキュメント</returns>
-    private static IHtmlDocument? GetParseHtml(string url)
+    private static async Task<IHtmlDocument?> GetParseHtml(string url)
     {
-      // HTML取得
-      using var client = new HttpClient();
+
       try
       {
-        string contents = client.GetStringAsync(url).Result;
+        HttpResponseMessage response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+        string contents = await response.Content.ReadAsStringAsync();
 
         // HTMLパース
         var parser = new HtmlParser();
         return parser.ParseDocument(contents);
       }
-      catch (Exception e)
+      catch (HttpRequestException e)
       {
-        Console.WriteLine("exception caught!!");
-        Console.WriteLine(e);
       }
 
       return null;

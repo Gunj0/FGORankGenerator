@@ -14,11 +14,11 @@
 
     public string? Range { get; set; }
 
-    public string? GameWithRank { get; set; }
+    public int OverallRank { get; set; }
 
-    public string? AppMediaRate { get; set; }
+    public int AppMediaRate { get; set; }
 
-    public string? AppMediaOrbit { get; set; }
+    public int AppMediaOrbit { get; set; }
 
   }
 }

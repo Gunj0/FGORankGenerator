@@ -20,12 +20,24 @@ namespace FGORankGenerator.Models
       return sb.ToString();
     }
 
+    /// <summary>
+    /// ヘッダリスト
+    /// </summary>
     private static string[] headerArray
-      = { "Id", "鯖名", "星", "クラス", "タイプ", "範囲",
-      "GameWith総合", "AppMedia攻略", "AppMedia周回" };
+      = {
+      "No.",
+      "鯖名",
+      "星",
+      "Class",
+      "色",
+      "範囲",
+      "総",
+      "攻",
+      "周"
+    };
 
     /// <summary>
-    /// csvのheaderを生成
+    /// csvのヘッダを生成
     /// </summary>
     /// <param name="headerArray"></param>
     /// <returns></returns>
@@ -56,7 +68,7 @@ namespace FGORankGenerator.Models
       sb.Append(string.Format($@"""{servant.Class}"","));
       sb.Append(string.Format($@"""{servant.Type}"","));
       sb.Append(string.Format($@"""{servant.Range}"","));
-      sb.Append(string.Format($@"""{servant.GameWithRank}"","));
+      sb.Append(string.Format($@"""{servant.OverallRank}"","));
       sb.Append(string.Format($@"""{servant.AppMediaRate}"","));
       sb.Append(string.Format($@"""{servant.AppMediaOrbit}"","));
 

@@ -8,10 +8,7 @@ namespace FGORankGenerator.Models
     // AppMedia URL
     private const string appMediaURL = "https://appmedia.jp/fategrandorder/1351236";
 
-    // GameWith URL
-    private const string gameWithURL = "https://gamewith.jp/fgo/article/show/62409";
-
-    // HttpClientは使い回さなければいけないらしい
+    // HttpClientは使い回す必要がある
     private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(10)};
 
     /// <summary>
@@ -27,27 +24,27 @@ namespace FGORankGenerator.Models
 
       if (appMediaDoc != null)
       {
-
         // 鯖ID取得
         var elements = appMediaDoc.QuerySelectorAll(".servant_results_tr > td");
         int order = 1;
-        int i = 0;
         foreach (var element in elements)
         {
           if (order % 3 == 1)
           {
-            servantList.Add(new ServantModel()
-            {
-              Id = int.Parse(element.GetAttribute("data-for_sort")),
+            string? servantId = element.GetAttribute("data-for_sort");
+            if (!string.IsNullOrEmpty(servantId)){
+              servantList.Add(new ServantModel()
+              {
+                Id = int.Parse(servantId),
             });
+            }
           }
           order++;
-          i++;
         };
 
         // 鯖名取得
         elements = appMediaDoc.QuerySelectorAll(".servant_results_tr > td > a > div");
-        i = 0;
+        int i = 0;
         foreach (var element in elements)
         {
           // 哪吒は文字化けするのでひらがなにする
@@ -67,77 +64,21 @@ namespace FGORankGenerator.Models
         i = 0;
         foreach (var element in elements)
         {
-          servantList[i].Rarity = int.Parse(element.GetAttribute("data-rarity")); // レア度
-          servantList[i].AppMediaRate = element.GetAttribute("data-rate");        // 攻略ランク
-          servantList[i].AppMediaOrbit = element.GetAttribute("data-orbit");      // 周回ランク
-          servantList[i].Class = element.GetAttribute("data-class");              // クラス
-          servantList[i].Type = element.GetAttribute("data-type");                // タイプ
-          servantList[i].Range = element.GetAttribute("data-range");              // 範囲
+          string? rarity = element.GetAttribute("data-rarity");
+          if (!string.IsNullOrEmpty(rarity)){
+            servantList[i].Rarity = int.Parse(rarity);                // 星
+          }
+          servantList[i].Class = element.GetAttribute("data-class");  // クラス
+          servantList[i].Type = element.GetAttribute("data-type");    // タイプ
+          servantList[i].Range = element.GetAttribute("data-range");  // 範囲
+
+          int rate = RankToNum(element.GetAttribute("data-rate"));
+          int orbit =　RankToNum(element.GetAttribute("data-orbit"));
+          servantList[i].OverallRank = rate + orbit;                  // 総合ポイント
+          servantList[i].AppMediaRate = rate;                         // 攻略ポイント
+          servantList[i].AppMediaOrbit = orbit;                       // 周回ポイント
           i++;
         };
-
-        // GamewithのHTML解析
-        IHtmlDocument? gameWithDoc = GetParseHtml(gameWithURL).Result;
-
-        // Gamewith評価取得
-        if (gameWithDoc != null)
-        {
-          i = 1;
-          elements = gameWithDoc.QuerySelectorAll(".fgo-ranking-table");
-          foreach (var element in elements)
-          {
-            string rank = "";
-            switch (i)
-            {
-              case 1:
-                rank = "S+";
-                break;
-              case 2:
-                rank = "S";
-                break;
-              case 3:
-                rank = "A+";
-                break;
-              case 4:
-                rank = "A";
-                break;
-              case 5:
-                rank = "B+";
-                break;
-              case 6:
-                rank = "B";
-                break;
-              case 7:
-                rank = "C";
-                break;
-              case 8:
-                rank = "D";
-                break;
-              default:
-                rank = "EX";
-                break;
-            }
-
-            var parser = new HtmlParser();
-            var img = parser.ParseDocument(element.InnerHtml).
-              QuerySelectorAll("table > tbody > tr > td > div > a > div > div > img");
-            foreach (var item in img)
-            {
-              // GameWith上のIDを取得
-              var id = int.Parse(item.GetAttribute("data-original").ToString().Substring(53, 3));
-              // リストからID一致検索
-              var index = servantList.FindIndex(x => x.Id == id);
-              // GameWithランクを格納
-              servantList[index].GameWithRank = rank;
-            };
-            i++;
-          };
-        }
-
-        // メカエリIIの評価はメカエリと同じ
-        var mechaIndex = servantList.FindIndex(x => x.Id == 190);
-        var mechaIIIndex = servantList.FindIndex(x => x.Id == 191);
-        servantList[mechaIIIndex].GameWithRank = servantList[mechaIndex].GameWithRank;
 
         // ID順に整理
         servantList = servantList.OrderBy(item => item.Id).ToList();
@@ -152,7 +93,6 @@ namespace FGORankGenerator.Models
     /// <returns>解析済みドキュメント</returns>
     private static async Task<IHtmlDocument?> GetParseHtml(string url)
     {
-
       try
       {
         HttpResponseMessage response = await _httpClient.GetAsync(url);
@@ -168,6 +108,51 @@ namespace FGORankGenerator.Models
       }
 
       return null;
+    }
+
+    /// <summary>
+    /// ランクに応じた数値を返します。
+    /// </summary>
+    /// <param name="rank"></param>
+    /// <returns></returns>
+    private static int RankToNum (string? rank)
+    {
+      int num = 0;
+      switch (rank)
+      {
+        case "SSS":
+          num = 9;
+          break;
+        case "SS":
+          num = 8;
+          break;
+        case "S+":
+          num = 7;
+          break;
+        case "S":
+          num = 6;
+          break;
+        case "A+":
+          num = 5;
+          break;
+        case "A":
+          num = 4;
+          break;
+        case "B":
+          num = 3;
+          break;
+        case "C":
+          num = 2;
+          break;
+        case "D":
+          num = 1;
+          break;
+        default:
+          num = 0;
+          break;
+      }
+
+      return num;
     }
   }
 }

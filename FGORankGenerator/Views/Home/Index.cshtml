@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<FGORankGenerator.Models.ServantModel>;
+
+@{
   ViewData["Title"] = "HOME";
 }
 
@@ -22,3 +24,47 @@
     <button class="btn btn-primary" value="download" name="download" type="submit">CSVダウンロード</button>
   }
 </div>
+
+
+@*
+  <div class="button">
+  @using (Html.BeginForm("GetLatestData", "Home", FormMethod.Get))
+  {
+    <button class="btn btn-primary" value="getData" name="getData" type="submit">
+      最新データ取得
+    </button>
+  }
+</div>
+*@
+
+<table class="table table-striped table-hover table-sm table-responsive">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">No.</th>
+      <th scope="col">名前</th>
+      <th scope="col">星</th>
+      <th scope="col">Class</th>
+      <th scope="col">色</th>
+      <th scope="col">範囲</th>
+      <th scope="col">総</th>
+      <th scope="col">攻</th>
+      <th scope="col">周</th>
+    </tr>
+  </thead>
+  <tbody>
+  @foreach(var servant in Model){
+    <tr class="data">
+      <td style="display:none"><input type="checkbox" /></td>
+      <td scope="row">@servant.Id</td>
+      <td>@servant.Name</td>
+      <td>@servant.Rarity</td>
+      <td>@servant.Class</td>
+      <td>@servant.Type</td>
+      <td>@servant.Range</td>
+      <td>@servant.OverallRank</td>
+      <td>@servant.AppMediaRate</td>
+      <td>@servant.AppMediaOrbit</td>
+    </tr>
+  }
+  </tbody>
+</table>

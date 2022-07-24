@@ -81,7 +81,7 @@ namespace FGORankGenerator.Models
         };
 
         // ID順に整理
-        servantList = servantList.OrderBy(item => item.Id).ToList();
+        servantList = servantList.OrderByDescending(item => item.OverallRank).ToList();
       }
       return servantList;
     }

@@ -18,7 +18,9 @@ namespace FGORankGenerator.Controllers
 
     public IActionResult Index()
     {
-      return View();
+      var servantList = Scraping.GetServantData();
+
+      return View("Index", servantList);
     }
 
     public IActionResult Contact()
@@ -40,6 +42,17 @@ namespace FGORankGenerator.Controllers
         var csvData = Encoding.GetEncoding("Shift_JIS").GetBytes(csvString);
 
         return File(csvData, "text/csv", fileName);
+      }
+      return View();
+    }
+
+    public IActionResult GetLatestData(string getData)
+    {
+      if (getData == "getData")
+      {
+        var servantList = Scraping.GetServantData();
+
+        return View("Index", servantList);
       }
       return View();
     }

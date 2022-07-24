@@ -26,7 +26,7 @@ namespace FGORankGenerator.Models
     private static string[] headerArray
       = {
       "No.",
-      "鯖名",
+      "名前",
       "星",
       "Class",
       "色",

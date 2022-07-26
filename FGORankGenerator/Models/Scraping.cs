@@ -68,7 +68,12 @@ namespace FGORankGenerator.Models
           if (!string.IsNullOrEmpty(rarity)){
             servantList[i].Rarity = int.Parse(rarity);                // 星
           }
-          servantList[i].Class = element.GetAttribute("data-class");  // クラス
+
+          string? className = element.GetAttribute("data-class");
+          if (!string.IsNullOrEmpty(className))
+          {
+            servantList[i].Class = ClassToKanji(className);                // 星
+          }
           servantList[i].Type = element.GetAttribute("data-type");    // タイプ
           servantList[i].Range = element.GetAttribute("data-range");  // 範囲
 
@@ -153,6 +158,66 @@ namespace FGORankGenerator.Models
       }
 
       return num;
+    }
+
+    /// <summary>
+    /// クラスに応じた漢字一文字を返します。
+    /// </summary>
+    /// <param name="class"></param>
+    /// <returns></returns>
+    private static string ClassToKanji(string className)
+    {
+      string kanji = "";
+      switch (className)
+      {
+        case "セイバー":
+          kanji = "剣";
+          break;
+        case "アーチャー":
+          kanji = "弓";
+          break;
+        case "ランサー":
+          kanji = "槍";
+          break;
+        case "ライダー":
+          kanji = "騎";
+          break;
+        case "キャスター":
+          kanji = "術";
+          break;
+        case "アサシン":
+          kanji = "殺";
+          break;
+        case "バーサーカー":
+          kanji = "狂";
+          break;
+        case "シールダー":
+          kanji = "盾";
+          break;
+        case "ルーラー":
+          kanji = "裁";
+          break;
+        case "アヴェンジャー":
+          kanji = "讐";
+          break;
+        case "ムーンキャンサー":
+          kanji = "月";
+          break;
+        case "アルターエゴ":
+          kanji = "分";
+          break;
+        case "フォーリナー":
+          kanji = "降";
+          break;
+        case "プリテンダー":
+          kanji = "詐";
+          break;
+        default:
+          kanji = className;
+          break;
+      }
+
+      return kanji;
     }
   }
 }

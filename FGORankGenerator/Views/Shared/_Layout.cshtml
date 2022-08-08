@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
   <link rel="stylesheet" href="~/FGORankGenerator.styles.css" asp-append-version="true" />
   <link rel="icon" href="~/favicon.ico">
+  @* analytics *@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPB84Z3MWC"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -15,6 +16,10 @@
     gtag('js', new Date());
 
     gtag('config', 'G-ZPB84Z3MWC');
+  </script>
+  @* AdSense *@
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5077226600373691"
+          crossorigin="anonymous">
   </script>
 </head>
 <body>
@@ -53,24 +58,6 @@
   <script src="~/lib/jquery/dist/jquery.min.js"></script>
   <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="~/js/site.js" asp-append-version="true"></script>
-
-  <script>
-    $(document).ready(function() {
-        $('.data').click(function() {
-            $(this).toggleClass("bg-warning");
-        });
-    });
-
-    // cookie操作
-
-    document.cookie = "user=Tarou";
-  </script>
-
-  <style>
-    table tr.active {
-        background: #cc0;
-    }
-  </style>
 
   @await RenderSectionAsync("Scripts", required: false)
 </body>

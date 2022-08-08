@@ -5,16 +5,14 @@
 }
 
 <div class="main">
-  <ul>
-    <li>
-      <a href="https://appmedia.jp/fategrandorder/1351236" target="_blank">AppMedia -最強サーヴァントランキングまとめ-</a>
-    </li>
-  </ul>
   <p class="message">
-    から現在の各サーヴァント評価まとめcsvを生成します。
+    現在のサーヴァント評価を数値で表します。
   </p>
   <p class="message">
-    数値が高いほど高評価を表します。
+    クリックで色分けできるため、所持チェックなどに使えます。
+  </p>
+  <p class="link">
+    参考：<a href="https://appmedia.jp/fategrandorder/1351236" target="_blank">AppMedia -最強サーヴァントランキングまとめ-</a>
   </p>
 </div>
 
@@ -44,8 +42,8 @@
       <th scope="col">名</th>
       <th scope="col">星</th>
       <th scope="col">種</th>
-      @*<th scope="col">色</th>*@
-      @*<th scope="col">範囲</th>*@
+      <th scope="col">色</th>
+      <th scope="col">範</th>
       <th scope="col">総</th>
       <th scope="col">攻</th>
       <th scope="col">周</th>
@@ -53,14 +51,14 @@
   </thead>
   <tbody>
   @foreach(var servant in Model){
-    <tr class="data">
-      <td style="display:none"><input type="checkbox" /></td>
+    <tr class="data" id="@servant.Id">
+      @*<td style="display:none"><input type="checkbox" /></td>*@
       <td scope="row">@servant.Id</td>
       <td>@servant.Name</td>
       <td>@servant.Rarity</td>
       <td>@servant.Class</td>
-      @*<td>@servant.Type</td>*@
-      @*<td>@servant.Range</td>*@
+      <td>@servant.Type</td>
+      <td>@servant.Range</td>
       <td>@servant.OverallRank</td>
       <td>@servant.AppMediaRate</td>
       <td>@servant.AppMediaOrbit</td>

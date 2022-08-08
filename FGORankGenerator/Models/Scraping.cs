@@ -5,11 +5,13 @@ namespace FGORankGenerator.Models
 {
   public static class Scraping
   {
+    const double MAX_SERVANT_SCORE = 18;
+
     // AppMedia URL
     private const string appMediaURL = "https://appmedia.jp/fategrandorder/1351236";
 
     // HttpClientは使い回す必要がある
-    private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(10)};
+    private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
 
     /// <summary>
     /// スクレイピングで得た各サーヴァント評価リストを返します。
@@ -26,17 +28,18 @@ namespace FGORankGenerator.Models
       {
         // 鯖ID取得
         var elements = appMediaDoc.QuerySelectorAll(".servant_results_tr > td");
-        int order = 1;
+        int order = 1; // 3つおきに取得する
         foreach (var element in elements)
         {
           if (order % 3 == 1)
           {
             string? servantId = element.GetAttribute("data-for_sort");
-            if (!string.IsNullOrEmpty(servantId)){
+            if (!string.IsNullOrEmpty(servantId))
+            {
               servantList.Add(new ServantModel()
               {
                 Id = int.Parse(servantId),
-            });
+              });
             }
           }
           order++;
@@ -54,6 +57,7 @@ namespace FGORankGenerator.Models
           }
           else
           {
+            // 改行は削除
             servantList[i].Name = element.InnerHtml.Replace("<br>", "");
           }
           i++;
@@ -65,23 +69,20 @@ namespace FGORankGenerator.Models
         foreach (var element in elements)
         {
           string? rarity = element.GetAttribute("data-rarity");
-          if (!string.IsNullOrEmpty(rarity)){
+          if (!string.IsNullOrEmpty(rarity))
+          {
             servantList[i].Rarity = int.Parse(rarity);                // 星
           }
 
-          string? className = element.GetAttribute("data-class");
-          if (!string.IsNullOrEmpty(className))
-          {
-            servantList[i].Class = ClassToKanji(className);                // 星
-          }
-          servantList[i].Type = element.GetAttribute("data-type");    // タイプ
-          servantList[i].Range = element.GetAttribute("data-range");  // 範囲
+          servantList[i].Class = ClassToKanji(element.GetAttribute("data-class"));           // 種
+          servantList[i].Type = ColorToAChara(element.GetAttribute("data-type"));    // 色
+          servantList[i].Range = RangeToAChara(element.GetAttribute("data-range"));  // 範
 
           int rate = RankToNum(element.GetAttribute("data-rate"));
-          int orbit =　RankToNum(element.GetAttribute("data-orbit"));
-          servantList[i].OverallRank = rate + orbit;                  // 総合ポイント
-          servantList[i].AppMediaRate = rate;                         // 攻略ポイント
-          servantList[i].AppMediaOrbit = orbit;                       // 周回ポイント
+          int orbit = RankToNum(element.GetAttribute("data-orbit"));
+          servantList[i].AppMediaRate = rate;                         // 攻
+          servantList[i].AppMediaOrbit = orbit;                       // 周
+          servantList[i].OverallRank = (rate + orbit) / MAX_SERVANT_SCORE * 10; // 総
           i++;
         };
 
@@ -108,7 +109,7 @@ namespace FGORankGenerator.Models
         var parser = new HtmlParser();
         return parser.ParseDocument(contents);
       }
-      catch (HttpRequestException e)
+      catch
       {
       }
 
@@ -120,40 +121,40 @@ namespace FGORankGenerator.Models
     /// </summary>
     /// <param name="rank"></param>
     /// <returns></returns>
-    private static int RankToNum (string? rank)
+    private static int RankToNum(string? rank)
     {
-      int num = 0;
+      int num;
       switch (rank)
       {
         case "SSS":
-          num = 9;
+          num = 10;
           break;
         case "SS":
-          num = 8;
+          num = 9;
           break;
         case "S+":
-          num = 7;
+          num = 8;
           break;
         case "S":
-          num = 6;
+          num = 7;
           break;
         case "A+":
-          num = 5;
+          num = 6;
           break;
         case "A":
-          num = 4;
+          num = 5;
           break;
         case "B":
-          num = 3;
+          num = 4;
           break;
         case "C":
-          num = 2;
+          num = 3;
           break;
         case "D":
-          num = 1;
+          num = 2;
           break;
         default:
-          num = 0;
+          num = 1;
           break;
       }
 
@@ -163,11 +164,11 @@ namespace FGORankGenerator.Models
     /// <summary>
     /// クラスに応じた漢字一文字を返します。
     /// </summary>
-    /// <param name="class"></param>
+    /// <param name="className"></param>
     /// <returns></returns>
-    private static string ClassToKanji(string className)
+    private static string ClassToKanji(string? className)
     {
-      string kanji = "";
+      string kanji;
       switch (className)
       {
         case "セイバー":
@@ -218,6 +219,60 @@ namespace FGORankGenerator.Models
       }
 
       return kanji;
+    }
+
+    /// <summary>
+    /// 色を一文字にします。
+    /// </summary>
+    /// <param name="color"></param>
+    /// <returns></returns>
+    private static string ColorToAChara(string? color)
+    {
+      string chr;
+      switch (color)
+      {
+        case "Arts":
+          chr = "A";
+          break;
+        case "Buster":
+          chr = "B";
+          break;
+        case "Quick":
+          chr = "Q";
+          break;
+        default:
+          chr = color;
+          break;
+      }
+
+      return chr;
+    }
+
+    /// <summary>
+    /// 範囲を一文字にします。
+    /// </summary>
+    /// <param name="color"></param>
+    /// <returns></returns>
+    private static string RangeToAChara(string? range)
+    {
+      string chr;
+      switch (range)
+      {
+        case "全体":
+          chr = "全";
+          break;
+        case "単体":
+          chr = "単";
+          break;
+        case "補助":
+          chr = "補";
+          break;
+        default:
+          chr = range;
+          break;
+      }
+
+      return chr;
     }
   }
 }

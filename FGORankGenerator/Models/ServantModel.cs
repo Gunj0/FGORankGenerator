@@ -14,11 +14,10 @@
 
     public string? Range { get; set; }
 
-    public int OverallRank { get; set; }
-
     public int AppMediaRate { get; set; }
 
     public int AppMediaOrbit { get; set; }
 
+    public double OverallRank { get; set; }
   }
 }

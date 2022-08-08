@@ -6,7 +6,7 @@
 
 <div class="main">
   <p class="message">
-    現在のサーヴァント評価を数値で表します。
+    最新のサーヴァント評価を10段階でリアルタイム更新します。
   </p>
   <p class="message">
     クリックで色分けできるため、所持チェックなどに使えます。
@@ -23,7 +23,6 @@
   }
 </div>
 
-
 @*
   <div class="button">
   @using (Html.BeginForm("GetLatestData", "Home", FormMethod.Get))
@@ -39,31 +38,45 @@
   <thead class="thead-dark">
     <tr>
       <th scope="col">No.</th>
-      <th scope="col">名</th>
-      <th scope="col">星</th>
-      <th scope="col">種</th>
-      <th scope="col">色</th>
-      <th scope="col">範</th>
-      <th scope="col">総</th>
-      <th scope="col">攻</th>
-      <th scope="col">周</th>
+      <th scope="col">サーヴァント名</th>
+      <th scope="col" class="text-center">★</th>
+      <th scope="col" class="text-center">種</th>
+      <th scope="col" class="text-center">色</th>
+      <th scope="col" class="text-center">範</th>
+      <th scope="col" class="text-center">攻</th>
+      <th scope="col" class="text-center">周</th>
+      <th scope="col" class="text-center">総</th>
     </tr>
   </thead>
   <tbody>
-  @foreach(var servant in Model){
-    <tr class="data" id="@servant.Id">
-      @*<td style="display:none"><input type="checkbox" /></td>*@
-      <td scope="row">@servant.Id</td>
-      <td>@servant.Name</td>
-      <td>@servant.Rarity</td>
-      <td>@servant.Class</td>
-      <td>@servant.Type</td>
-      <td>@servant.Range</td>
-      <td>@servant.OverallRank</td>
-      <td>@servant.AppMediaRate</td>
-      <td>@servant.AppMediaOrbit</td>
-    </tr>
-  }
+    @foreach (var servant in Model)
+    {
+      <tr class="data" id="@servant.Id">
+        @*<td style="display:none"><input type="checkbox" /></td>*@
+        <td scope="row">@servant.Id</td>
+        <td>@servant.Name</td>
+        <td class="text-center">@servant.Rarity</td>
+        <td class="text-center">@servant.Class</td>
+        <td class="text-center">@servant.Type</td>
+        <td class="text-center">@servant.Range</td>
+        <td class="text-center">@servant.AppMediaRate</td>
+        <td class="text-center">@servant.AppMediaOrbit</td>
+        @* 桁を揃える *@
+        @{
+          var num = "";
+          var hoge = servant.OverallRank;
+          if (hoge >= 10)
+          {
+            num = hoge.ToString("F0");
+          }
+          else
+          {
+            num = hoge.ToString("F1");
+          }
+        }
+        <td class="text-center">@num</td>
+      </tr>
+    }
   </tbody>
 </table>
 

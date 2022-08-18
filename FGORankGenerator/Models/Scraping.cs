@@ -5,16 +5,17 @@ namespace FGORankGenerator.Models
 {
   public static class Scraping
   {
-    const double MAX_SERVANT_SCORE = 18;
+    const double MAX_SERVANT_SCORE = 20;
 
     // AppMedia URL
     private const string appMediaURL = "https://appmedia.jp/fategrandorder/1351236";
 
     // HttpClientは使い回す必要がある
-    private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
+    private static readonly HttpClient _httpClient
+      = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
 
     /// <summary>
-    /// スクレイピングで得た各サーヴァント評価リストを返します。
+    /// スクレイピングした各サーヴァント評価リストを返します。
     /// </summary>
     /// <returns></returns>
     public static List<ServantModel> GetServantData()
@@ -26,67 +27,88 @@ namespace FGORankGenerator.Models
 
       if (appMediaDoc != null)
       {
-        // 鯖ID取得
-        var elements = appMediaDoc.QuerySelectorAll(".servant_results_tr > td");
-        int order = 1; // 3つおきに取得する
-        foreach (var element in elements)
+        // 攻略ランク以外取得
+        var orbitTable = appMediaDoc.QuerySelectorAll("#servant_ranking_orbit > table > tbody > tr");
+        foreach (var orbitRow in orbitTable)
         {
-          if (order % 3 == 1)
+          string? dataTag = orbitRow.GetAttribute("data-tag");
+          if (dataTag == null)
           {
-            string? servantId = element.GetAttribute("data-for_sort");
-            if (!string.IsNullOrEmpty(servantId))
+            var dataRank = orbitRow.GetAttribute("data-rank");
+
+            var parser = new HtmlParser();
+            IHtmlDocument rowDoc = parser.ParseDocument(orbitRow.InnerHtml);
+
+            var aList = rowDoc.QuerySelectorAll("a");
+            var imgList = rowDoc.QuerySelectorAll("img");
+            int num = 0;
+            foreach (var item in aList)
             {
-              servantList.Add(new ServantModel()
+              var url = item.GetAttribute("href");
+              var rarity = item.GetAttribute("data-rarity");
+              var name = imgList[num].GetAttribute("alt");
+              if (name == "哪吒")
               {
-                Id = int.Parse(servantId),
-              });
+                // 哪吒は文字化けするのでひらがなにする
+                name = "なた";
+              }
+              else
+              {
+                // 改行は削除
+                name = name.Replace("<br>", "");
+              }
+
+              if (url != null && rarity != null)
+              {
+                servantList.Add(new ServantModel()
+                {
+                  Id = int.Parse(url.Replace("https://appmedia.jp/fategrandorder/", "")),
+                  Rarity = int.Parse(rarity),
+                  Type = ColorToAChara(item.GetAttribute("data-type")),
+                  Class = ClassToKanji(item.GetAttribute("data-class")),
+                  Range = RangeToAChara(item.GetAttribute("data-range")),
+                  Name = name,
+                  AppMediaOrbit = RankToNum(dataRank),
+                });
+              }
+              num++;
             }
           }
-          order++;
-        };
+        }
 
-        // 鯖名取得
-        elements = appMediaDoc.QuerySelectorAll(".servant_results_tr > td > a > div");
-        int i = 0;
-        foreach (var element in elements)
+        // 攻略ランク取得
+        var rateTable = appMediaDoc.QuerySelectorAll("#servant_ranking_rate > table > tbody > tr");
+        foreach (var rateRow in rateTable)
         {
-          // 哪吒は文字化けするのでひらがなにする
-          if (element.InnerHtml == "哪吒")
+          string? dataTag = rateRow.GetAttribute("data-tag");
+          if (dataTag == null)
           {
-            servantList[i].Name = "なた";
-          }
-          else
-          {
-            // 改行は削除
-            servantList[i].Name = element.InnerHtml.Replace("<br>", "");
-          }
-          i++;
-        };
+            var dataRank = rateRow.GetAttribute("data-rank");
 
-        // その他
-        elements = appMediaDoc.GetElementsByClassName("servant_results_tr");
-        i = 0;
-        foreach (var element in elements)
+            var parser = new HtmlParser();
+            IHtmlDocument rowDoc = parser.ParseDocument(rateRow.InnerHtml);
+
+            var aList = rowDoc.QuerySelectorAll("a");
+            foreach (var item in aList)
+            {
+              var url = item.GetAttribute("href");
+              if (url != null)
+              {
+                var id = int.Parse(url.Replace("https://appmedia.jp/fategrandorder/", ""));
+                var index = servantList.FindIndex(x => x.Id == id);
+                servantList[index].AppMediaRate = RankToNum(dataRank);
+              }
+            }
+          }
+        }
+
+        // 総合ランク
+        foreach (var item in servantList)
         {
-          string? rarity = element.GetAttribute("data-rarity");
-          if (!string.IsNullOrEmpty(rarity))
-          {
-            servantList[i].Rarity = int.Parse(rarity);                // 星
-          }
+          item.OverallRank = (item.AppMediaRate + item.AppMediaOrbit) / MAX_SERVANT_SCORE * 10;
+        }
 
-          servantList[i].Class = ClassToKanji(element.GetAttribute("data-class"));           // 種
-          servantList[i].Type = ColorToAChara(element.GetAttribute("data-type"));    // 色
-          servantList[i].Range = RangeToAChara(element.GetAttribute("data-range"));  // 範
-
-          int rate = RankToNum(element.GetAttribute("data-rate"));
-          int orbit = RankToNum(element.GetAttribute("data-orbit"));
-          servantList[i].AppMediaRate = rate;                         // 攻
-          servantList[i].AppMediaOrbit = orbit;                       // 周
-          servantList[i].OverallRank = (rate + orbit) / MAX_SERVANT_SCORE * 10; // 総
-          i++;
-        };
-
-        // ID順に整理
+        // 総合ランク順に整理
         servantList = servantList.OrderByDescending(item => item.OverallRank).ToList();
       }
       return servantList;
@@ -126,31 +148,31 @@ namespace FGORankGenerator.Models
       int num;
       switch (rank)
       {
-        case "SSS":
+        case "SS":
           num = 10;
           break;
-        case "SS":
+        case "S":
           num = 9;
           break;
-        case "S+":
+        case "A+":
           num = 8;
           break;
-        case "S":
+        case "A":
           num = 7;
           break;
-        case "A+":
+        case "B+":
           num = 6;
           break;
-        case "A":
+        case "B":
           num = 5;
           break;
-        case "B":
+        case "C":
           num = 4;
           break;
-        case "C":
+        case "D":
           num = 3;
           break;
-        case "D":
+        case "E":
           num = 2;
           break;
         default:

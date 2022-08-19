@@ -22,10 +22,18 @@ function setLocalStorage(key, value) {
 }
 
 // ローカルストレージからチェック状態を復元
-for (let i = 1; i < 500; i++) {
-  let check = getLocalStorage(i);
+//for (let i = 1; i < 500; i++) {
+//  let check = getLocalStorage(i);
+//  if (check == 1) {
+//    $('#' + i).toggleClass("bg-warning");
+//  }
+//}
+
+for (let i = 0, len = localStorage.length; i < len; i++) {
+  let key = localStorage.key(i);
+  let check = localStorage.getItem(key);
   if (check == 1) {
-    $('#' + i).toggleClass("bg-warning");
+    $('#' + key).toggleClass("bg-warning");
   }
 }
 

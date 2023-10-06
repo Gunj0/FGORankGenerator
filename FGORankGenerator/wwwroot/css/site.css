@@ -4,6 +4,10 @@ html {
   min-height: 100%;
 }
 
+.nav-item {
+  margin-left: 10px;
+}
+
 body {
   margin-bottom: 60px;
   font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
@@ -35,13 +39,50 @@ a {
   font-size: 14px;
 }
 
+.table-title {
+  font-size: 10px;
+}
+
 .main {
   width: 100%;
   margin: 20px auto;
 }
+
+.tablesorter-headerUnSorted {
+  background-image: url(../images/sort.png);
+  background-size: 10px;
+  background-repeat: no-repeat;
+  background-position: center right;
+  cursor: pointer;
+}
+
+.tablesorter-headerDesc {
+  background-color: red;
+  color: red;
+  background-image: url(../images/sort_a.png);
+  background-size: 10px;
+  background-repeat: no-repeat;
+  background-position: center right;
+  cursor: pointer;
+}
+
+.tablesorter-headerAsc {
+  background-color: blue;
+  color: blue;
+  background-image: url(../images/sort_b.png);
+  background-size: 10px;
+  background-repeat: no-repeat;
+  background-position: center right;
+  cursor: pointer;
+}
+
 .twitter {
   width: 100%;
   margin: 30px auto;
+}
+
+.twitter-share-button {
+  margin-left: 10px;
 }
 
 @media screen and (min-width: 481px) {
@@ -49,6 +90,7 @@ a {
     width: 80%;
     margin: 20px auto;
   }
+
   .twitter {
     width: 80%;
     margin: 30px auto;
@@ -60,6 +102,7 @@ a {
     width: 60%;
     margin: 20px auto;
   }
+
   .twitter {
     width: 40%;
     margin: 30px auto;

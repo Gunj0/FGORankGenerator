@@ -21,14 +21,18 @@ function setLocalStorage(key, value) {
   }
 }
 
-// ローカルストレージからチェック状態を復元
-//for (let i = 1; i < 500; i++) {
-//  let check = getLocalStorage(i);
-//  if (check == 1) {
-//    $('#' + i).toggleClass("bg-warning");
-//  }
-//}
+// ローカルストレージを全消去
+function clearLocalStorage() {
+  try {
+    localStorage.clear();
+    return true;
+  }
+  catch (e) {
+    return "error";
+  }
+}
 
+// ローカルストレージから所持チェック復元
 for (let i = 0, len = localStorage.length; i < len; i++) {
   let key = localStorage.key(i);
   let check = localStorage.getItem(key);
@@ -37,7 +41,7 @@ for (let i = 0, len = localStorage.length; i < len; i++) {
   }
 }
 
-// クリック時動作
+// テーブルクリック
 $(document).ready(function () {
   $('.data').click(function () {
     // 黄色に変更
@@ -53,4 +57,39 @@ $(document).ready(function () {
       }
     }
   });
+});
+
+// テーブルソート(https://qiita.com/fromage-blanc/items/94b90e2b9431884ad6fc)
+$(document).ready(function () {
+  $('#sort_table').tablesorter();
+});
+
+// 全チェック処理
+function allCheck() {
+  $('tbody tr').each(function (i, elem) {
+    let id = $(this).attr("id");
+    localStorage.setItem(id, '1');
+  });
+};
+
+// 全チェッククリック
+$(document).ready(function () {
+  $('#all-check').click(function () {
+    var result = window.confirm("全てをチェック状態にしますか？")
+    if (result) {
+      allCheck();
+      window.location.reload();
+    }
+  })
+});
+
+// チェックリセットクリック
+$(document).ready(function () {
+  $('#check-reset').click(function () {
+    var result = window.confirm("チェック状態をリセットしますか？")
+    if (result) {
+      clearLocalStorage();
+      window.location.reload();
+    }
+  })
 });

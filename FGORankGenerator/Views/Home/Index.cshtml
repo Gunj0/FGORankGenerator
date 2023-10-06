@@ -6,13 +6,13 @@
 
 <div class="main">
   <p class="message">
-    10段階サーヴァント評価をリアルタイム更新します
+    10段階サーヴァント評価をリアルタイム更新！
   </p>
   <p class="message">
-    クリックで所持チェック保存可能
+    クリックで所持チェックが保存可能です
   </p>
   <p class="link">
-    参考：<a href="https://appmedia.jp/fategrandorder/1351236" target="_blank">AppMedia -最強サーヴァントランキングまとめ-</a>
+    参考：<a href="https://appmedia.jp/fategrandorder/1351236" target="_blank">AppMedia様</a>
   </p>
 </div>
 
@@ -34,50 +34,56 @@
 </div>
 *@
 
-<table class="table table-striped table-hover table-sm table-responsive">
-  <thead class="thead-dark">
-    <tr>
+<table id="sort_table" class="table table-striped table-hover table-sm table-responsive">
+  <thead>
+    <tr class="table-title">
       <th style="display:none" scope="col">No.</th>
       <th scope="col">サーヴァント名</th>
-      <th scope="col" class="text-center">星</th>
-      <th scope="col" class="text-center">種</th>
-      <th scope="col" class="text-center">色</th>
-      <th scope="col" class="text-center">範</th>
-      <th scope="col" class="text-center">周</th>
-      <th scope="col" class="text-center">攻</th>
-      <th scope="col" class="text-center">総</th>
+      <th scope="col">星 </th>
+      <th scope="col">種</th>
+      <th scope="col">色</th>
+      <th scope="col">範</th>
+      <th scope="col">周</th>
+      <th scope="col">攻</th>
+      <th scope="col">総</th>
     </tr>
   </thead>
   <tbody>
     @foreach (var servant in Model)
     {
       <tr class="data" id="@servant.Id">
-        @*<td style="display:none"><input type="checkbox" /></td>*@
         <td style="display:none" scope="row">@servant.Id</td>
         <td>@servant.Name</td>
-        <td class="text-center">@servant.Rarity</td>
-        <td class="text-center">@servant.Class</td>
-        <td class="text-center">@servant.Type</td>
-        <td class="text-center">@servant.Range</td>
-        <td class="text-center">@servant.AppMediaOrbit</td>
-        <td class="text-center">@servant.AppMediaRate</td>
+        <td>@servant.Rarity</td>
+        <td>@servant.Class</td>
+        <td>@servant.Type</td>
+        <td>@servant.Range</td>
+        <td>@servant.AppMediaOrbit</td>
+        <td>@servant.AppMediaRate</td>
         @* 桁を揃える *@
         @{
-          var num = "";
+          var overallRank = "";
           var hoge = servant.OverallRank;
           if (hoge >= 10)
           {
-            num = hoge.ToString("F0");
+            overallRank = hoge.ToString("F0");
           }
           else
           {
-            num = hoge.ToString("F1");
+            overallRank = hoge.ToString("F1");
           }
         }
-        <td class="text-center">@num</td>
+        <td class="text-center">@overallRank</td>
       </tr>
     }
   </tbody>
 </table>
 
-<a href="https://w.atwiki.jp/f_go/pages/304.html">参考：クラス一文字</a>
+<div class="text-center">
+  <button id="all-check" class="btn btn-primary">全チェック</button>
+  <button id="check-reset" class="btn btn-secondary">チェックリセット</button>
+</div>
+
+<div>
+  Sort icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+</div>

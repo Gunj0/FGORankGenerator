@@ -1,12 +1,10 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@ViewData["Title"] - FGO RankGenerator</title>
   <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-  <link rel="stylesheet" href="~/FGORankGenerator.styles.css" asp-append-version="true" />
   <link rel="icon" href="~/favicon.ico">
   @* analytics *@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPB84Z3MWC"></script>
@@ -14,13 +12,10 @@
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'G-ZPB84Z3MWC');
   </script>
   @* AdSense *@
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5077226600373691"
-          crossorigin="anonymous">
-  </script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5077226600373691" crossorigin="anonymous"></script>
 </head>
 <body>
   <header>
@@ -34,10 +29,10 @@
         <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
           <ul class="navbar-nav flex-grow-1">
             <li class="nav-item">
-              <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="nav-item">
               <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+            </li>
+            <li class="nav-item d-flex align-items-center">
+              <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="FGOサーヴァントランキングを見ながら所持チェック！ - FGO RankGenerator" data-url="https://fgorankgenerator.azurewebsites.net/" data-hashtags="FGORankGenerator,FGO" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
             </li>
           </ul>
         </div>
@@ -51,13 +46,19 @@
   </div>
 
   <footer class="border-top footer text-muted">
-    <div class="container">
-      &copy; 2022 - FGORankGenerator - <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+    <div class="container d-flex align-items-center">
+      &copy; 2022 - FGO RankGenerator - <a asp-area="" asp-controller="Home" asp-action="Contact"> Twitter</a>
+      <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="FGOサーヴァントランキングを見ながら所持チェック！ - FGO RankGenerator" data-url="https://fgorankgenerator.azurewebsites.net/" data-hashtags="FGORankGenerator,FGO" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
   </footer>
   <script src="~/lib/jquery/dist/jquery.min.js"></script>
   <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+  @*ソート機能*@
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+  @*カスタムJS*@
   <script src="~/js/site.js" asp-append-version="true"></script>
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
   @await RenderSectionAsync("Scripts", required: false)
 </body>

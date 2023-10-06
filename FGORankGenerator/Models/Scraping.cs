@@ -5,7 +5,8 @@ namespace FGORankGenerator.Models
 {
   public static class Scraping
   {
-    const double MAX_SERVANT_SCORE = 20;
+    // 周回ランクと攻略ランクの合計最高ポイント
+    const double MAX_SERVANT_SCORE = 19;
 
     // AppMedia URL
     private const string appMediaURL = "https://appmedia.jp/fategrandorder/1351236";
@@ -17,7 +18,6 @@ namespace FGORankGenerator.Models
     /// <summary>
     /// スクレイピングした各サーヴァント評価リストを返します。
     /// </summary>
-    /// <returns></returns>
     public static List<ServantModel> GetServantData()
     {
       var servantList = new List<ServantModel>();
@@ -27,88 +27,101 @@ namespace FGORankGenerator.Models
 
       if (appMediaDoc != null)
       {
-        // 攻略ランク以外取得
+        // 周回ランクテーブル取得
         var orbitTable = appMediaDoc.QuerySelectorAll("#servant_ranking_orbit > table > tbody > tr");
         foreach (var orbitRow in orbitTable)
         {
+          // data-tagに値が入っていたらラベルなのでスキップ
           string? dataTag = orbitRow.GetAttribute("data-tag");
           if (dataTag == null)
           {
+            // 周回ランクを保持
             var dataRank = orbitRow.GetAttribute("data-rank");
 
+            // 中身を再解析
             var parser = new HtmlParser();
             IHtmlDocument rowDoc = parser.ParseDocument(orbitRow.InnerHtml);
 
+            // aタグから鯖URL・レア度・タイプ・クラス・範囲を取得
             var aList = rowDoc.QuerySelectorAll("a");
+            // imgタグから鯖名を取得
             var imgList = rowDoc.QuerySelectorAll("img");
             int num = 0;
+
             foreach (var item in aList)
             {
               var url = item.GetAttribute("href");
               var rarity = item.GetAttribute("data-rarity");
               var name = imgList[num].GetAttribute("alt");
-              if (name == "哪吒")
-              {
-                // 哪吒は文字化けするのでひらがなにする
-                name = "なた";
-              }
-              else
-              {
-                // 改行は削除
-                name = name.Replace("<br>", "");
-              }
+              num++;
 
-              if (url != null && rarity != null)
+              // メカエリIIはIとURLが同じでIDがかぶるのでスキップ
+              if (name == "メカエリチャンⅡ号機") continue;
+              // 哪吒は文字化けするのでひらがなにする
+              if (name == "哪吒") name = "なた";
+
+              // リストに追加
+              if (url != null && rarity != null && name != null)
               {
                 servantList.Add(new ServantModel()
                 {
-                  Id = int.Parse(url.Replace("https://appmedia.jp/fategrandorder/", "")),
+                  Id = int.Parse(url.Replace("/fategrandorder/", "")),
                   Rarity = int.Parse(rarity),
                   Type = ColorToAChara(item.GetAttribute("data-type")),
                   Class = ClassToKanji(item.GetAttribute("data-class")),
                   Range = RangeToAChara(item.GetAttribute("data-range")),
-                  Name = name,
-                  AppMediaOrbit = RankToNum(dataRank),
+                  Name = name.Replace("<br>", ""),
+                  AppMediaOrbit = RankToInt(dataRank),
                 });
               }
-              num++;
             }
           }
         }
 
-        // 攻略ランク取得
+        // 攻略ランクテーブル取得
         var rateTable = appMediaDoc.QuerySelectorAll("#servant_ranking_rate > table > tbody > tr");
         foreach (var rateRow in rateTable)
         {
+          // data-tagに値が入っていたらラベルなのでスキップ
           string? dataTag = rateRow.GetAttribute("data-tag");
           if (dataTag == null)
           {
+            // 攻略ランクを保持
             var dataRank = rateRow.GetAttribute("data-rank");
 
+            // 中身を再解析
             var parser = new HtmlParser();
             IHtmlDocument rowDoc = parser.ParseDocument(rateRow.InnerHtml);
 
+            // aタグから鯖URLを取得
             var aList = rowDoc.QuerySelectorAll("a");
+
             foreach (var item in aList)
             {
               var url = item.GetAttribute("href");
               if (url != null)
               {
-                var id = int.Parse(url.Replace("https://appmedia.jp/fategrandorder/", ""));
+                var id = int.Parse(url.Replace("/fategrandorder/", ""));
+                // URL IDからリストのインデックス検索
                 var index = servantList.FindIndex(x => x.Id == id);
-                servantList[index].AppMediaRate = RankToNum(dataRank);
+
+                // 攻略ランクを挿入
+                if (index != -1)  // 攻略ランクにだけ存在すると、index==-1になる
+                {
+                  servantList[index].AppMediaRate = RankToInt(dataRank);
+                }
               }
             }
           }
         }
 
-        // 総合ランク
+        // 総合ランクを挿入
         foreach (var item in servantList)
         {
           item.OverallRank = (item.AppMediaRate + item.AppMediaOrbit) / MAX_SERVANT_SCORE * 10;
         }
 
-        // 総合ランク順に整理
+        // 総合ランクで降順ソート
         servantList = servantList.OrderByDescending(item => item.OverallRank).ToList();
       }
       return servantList;
@@ -117,8 +130,6 @@ namespace FGORankGenerator.Models
     /// <summary>
     /// URLを渡すと解析済みHTMLドキュメントを返します。
     /// </summary>
-    /// <param name="url">解析したいURL</param>
-    /// <returns>解析済みドキュメント</returns>
     private static async Task<IHtmlDocument?> GetParseHtml(string url)
     {
       try
@@ -141,56 +152,58 @@ namespace FGORankGenerator.Models
     /// <summary>
     /// ランクに応じた数値を返します。
     /// </summary>
-    /// <param name="rank"></param>
-    /// <returns></returns>
-    private static int RankToNum(string? rank)
+    private static int RankToInt(string? rankStr)
     {
-      int num;
-      switch (rank)
+      int rankInt;
+      switch (rankStr)
       {
+        case "EX":
+          rankInt = 10;
+          break;
+        case "SSS":
+          rankInt = 10;
+          break;
         case "SS":
-          num = 10;
+          rankInt = 9;
           break;
         case "S":
-          num = 9;
+          rankInt = 8;
           break;
         case "A+":
-          num = 8;
+          rankInt = 7;
           break;
         case "A":
-          num = 7;
+          rankInt = 6;
           break;
         case "B+":
-          num = 6;
+          rankInt = 6;
           break;
         case "B":
-          num = 5;
+          rankInt = 5;
+          break;
+        case "C+":
+          rankInt = 4;
           break;
         case "C":
-          num = 4;
+          rankInt = 3;
           break;
         case "D":
-          num = 3;
-          break;
-        case "E":
-          num = 2;
+          rankInt = 2;
           break;
         default:
-          num = 1;
+          rankInt = 1;
           break;
       }
 
-      return num;
+      return rankInt;
     }
 
     /// <summary>
     /// クラスに応じた漢字一文字を返します。
     /// </summary>
-    /// <param name="className"></param>
-    /// <returns></returns>
-    private static string ClassToKanji(string? className)
+    private static string? ClassToKanji(string? className)
     {
-      string kanji;
+      string? kanji;
       switch (className)
       {
         case "セイバー":
@@ -214,20 +227,17 @@ namespace FGORankGenerator.Models
         case "バーサーカー":
           kanji = "狂";
           break;
-        case "シールダー":
-          kanji = "盾";
-          break;
         case "ルーラー":
           kanji = "裁";
           break;
         case "アヴェンジャー":
           kanji = "讐";
           break;
-        case "ムーンキャンサー":
-          kanji = "月";
-          break;
         case "アルターエゴ":
           kanji = "分";
+          break;
+        case "ムーンキャンサー":
+          kanji = "月";
           break;
         case "フォーリナー":
           kanji = "降";
@@ -235,8 +245,14 @@ namespace FGORankGenerator.Models
         case "プリテンダー":
           kanji = "詐";
           break;
+        case "ビースト":
+          kanji = "獣";
+          break;
+        case "シールダー":
+          kanji = "盾";
+          break;
         default:
-          kanji = className;
+          kanji = "謎";
           break;
       }
 
@@ -244,13 +260,11 @@ namespace FGORankGenerator.Models
     }
 
     /// <summary>
-    /// 色を一文字にします。
+    /// 色を一文字にして返します。
     /// </summary>
-    /// <param name="color"></param>
-    /// <returns></returns>
-    private static string ColorToAChara(string? color)
+    private static string? ColorToAChara(string? color)
     {
-      string chr;
+      string? chr;
       switch (color)
       {
         case "Arts":
@@ -263,7 +277,7 @@ namespace FGORankGenerator.Models
           chr = "Q";
           break;
         default:
-          chr = color;
+          chr = "複";
           break;
       }
 
@@ -271,13 +285,11 @@ namespace FGORankGenerator.Models
     }
 
     /// <summary>
-    /// 範囲を一文字にします。
+    /// 範囲を一文字にして返します。
     /// </summary>
-    /// <param name="color"></param>
-    /// <returns></returns>
-    private static string RangeToAChara(string? range)
+    private static string? RangeToAChara(string? range)
     {
-      string chr;
+      string? chr;
       switch (range)
       {
         case "全体":
@@ -290,7 +302,7 @@ namespace FGORankGenerator.Models
           chr = "補";
           break;
         default:
-          chr = range;
+          chr = "複";
           break;
       }
 

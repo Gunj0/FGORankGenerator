@@ -25,15 +25,14 @@ namespace FGORankGenerator.Models
     /// </summary>
     private static string[] headerArray
       = {
-      "No.",
-      "名前",
+      "サーヴァント名",
       "星",
-      "Class",
+      "種",
       "色",
-      "範囲",
-      "総",
+      "範",
+      "周",
       "攻",
-      "周"
+      "総",
     };
 
     /// <summary>
@@ -62,15 +61,14 @@ namespace FGORankGenerator.Models
     {
       var sb = new StringBuilder();
 
-      sb.Append(string.Format($@"""{servant.Id}"","));
       sb.Append(string.Format($@"""{servant.Name}"","));
       sb.Append(string.Format($@"""{servant.Rarity}"","));
       sb.Append(string.Format($@"""{servant.Class}"","));
       sb.Append(string.Format($@"""{servant.Type}"","));
       sb.Append(string.Format($@"""{servant.Range}"","));
-      sb.Append(string.Format($@"""{servant.OverallRank}"","));
-      sb.Append(string.Format($@"""{servant.AppMediaRate}"","));
       sb.Append(string.Format($@"""{servant.AppMediaOrbit}"","));
+      sb.Append(string.Format($@"""{servant.AppMediaRate}"","));
+      sb.Append(string.Format($@"""{servant.OverallRank}"","));
 
       return sb.ToString();
     }

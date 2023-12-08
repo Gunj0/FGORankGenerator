@@ -1,12 +1,13 @@
 ﻿using AngleSharp.Html.Parser;
 using AngleSharp.Html.Dom;
+using AngleSharp.Text;
 
 namespace FGORankGenerator.Models
 {
   public static class Scraping
   {
     // 周回ランクと攻略ランクの合計最高ポイント
-    const double MAX_SERVANT_SCORE = 19;
+    private const double MAX_SERVANT_SCORE = 19;
 
     // AppMedia URL
     private const string appMediaURL = "https://appmedia.jp/fategrandorder/1351236";
@@ -51,6 +52,14 @@ namespace FGORankGenerator.Models
             foreach (var item in aList)
             {
               var url = item.GetAttribute("href");
+              if (url != null && url.Contains("/fategrandorder/"))
+              {
+                url = url.Replace("/fategrandorder/", "");
+              }
+              else
+              {
+                url = url.Replace("fategrandorder/", "");
+              }
               var rarity = item.GetAttribute("data-rarity");
               var name = imgList[num].GetAttribute("alt");
               num++;
@@ -65,7 +74,7 @@ namespace FGORankGenerator.Models
               {
                 servantList.Add(new ServantModel()
                 {
-                  Id = int.Parse(url.Replace("/fategrandorder/", "")),
+                  Id = int.Parse(url),
                   Rarity = int.Parse(rarity),
                   Type = ColorToAChara(item.GetAttribute("data-type")),
                   Class = ClassToKanji(item.GetAttribute("data-class")),
@@ -99,9 +108,17 @@ namespace FGORankGenerator.Models
             foreach (var item in aList)
             {
               var url = item.GetAttribute("href");
+              if (url != null && url.Contains("/fategrandorder/"))
+              {
+                url = url.Replace("/fategrandorder/", "");
+              }
+              else
+              {
+                url = url.Replace("fategrandorder/", "");
+              }
               if (url != null)
               {
-                var id = int.Parse(url.Replace("/fategrandorder/", ""));
+                var id = int.Parse(url);
                 // URL IDからリストのインデックス検索
                 var index = servantList.FindIndex(x => x.Id == id);
 

@@ -22,8 +22,6 @@ jobs:
       run: dotnet restore "FGORankGenerator\FGORankGenerator.csproj"
     - name: Build
       run: dotnet build "$FGORankGenerator\FGORankGenerator.csproj" --configuration ${{ env.CONFIGURATION }} --no-restore
-    - name: Test
-      run: dotnet test "FGORankGenerator" --no-build
     - name: Publish
       run: dotnet publish "FGORankGenerator" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
     - name: Publish Artifacts

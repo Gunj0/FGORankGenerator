@@ -1,94 +1,53 @@
 ﻿using AngleSharp.Html.Parser;
 using AngleSharp.Html.Dom;
-using AngleSharp.Text;
+using AngleSharp.Dom;
 
 namespace FGORankGenerator.Models
 {
   public static class Scraping
   {
     // 周回ランクと攻略ランクの合計最高ポイント
-    private const double MAX_SERVANT_SCORE = 19;
+    private const double MAX_SERVANT_SCORE = 21.0; // SSS + SS
 
-    // AppMedia URL
-    private const string appMediaURL = "https://appmedia.jp/fategrandorder/1351236";
-
-    // HttpClientは使い回す必要がある
+    // HttpClientは1つを使い回す必要がある
     private static readonly HttpClient _httpClient
       = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
 
+    // AppMedia URL
+    private const string _appMediaURL = "https://appmedia.jp/fategrandorder/1351236";
+
     /// <summary>
-    /// スクレイピングした各サーヴァント評価リストを返します。
+    /// スクレイピングしたサーヴァント評価リストを返します。
     /// </summary>
     public static List<ServantModel> GetServantData()
     {
       var servantList = new List<ServantModel>();
 
       // AppMediaのHTML解析
-      IHtmlDocument? appMediaDoc = GetParseHtml(appMediaURL).Result;
+      IHtmlDocument? appMediaDoc = GetParseHtml(_appMediaURL).Result;
 
       if (appMediaDoc != null)
       {
-        // 周回ランクテーブル取得
-        var orbitTable = appMediaDoc.QuerySelectorAll("#servant_ranking_orbit > table > tbody > tr");
-        foreach (var orbitRow in orbitTable)
-        {
-          // data-tagに値が入っていたらラベルなのでスキップ
-          string? dataTag = orbitRow.GetAttribute("data-tag");
-          if (dataTag == null)
-          {
-            // 周回ランクを保持
-            var dataRank = orbitRow.GetAttribute("data-rank");
+        // 周回全ランクテーブル取得
+        InsertOrbitRank(
+          servantList,
+          appMediaDoc.QuerySelectorAll("#servant_ranking_orbit_all > table > tbody > tr")
+        );
 
-            // 中身を再解析
-            var parser = new HtmlParser();
-            IHtmlDocument rowDoc = parser.ParseDocument(orbitRow.InnerHtml);
+        // 周回単ランクテーブル取得
+        InsertOrbitRank(
+          servantList,
+          appMediaDoc.QuerySelectorAll("#servant_ranking_orbit_single > table > tbody > tr")
+        );
 
-            // aタグから鯖URL・レア度・タイプ・クラス・範囲を取得
-            var aList = rowDoc.QuerySelectorAll("a");
-            // imgタグから鯖名を取得
-            var imgList = rowDoc.QuerySelectorAll("img");
-            int num = 0;
-
-            foreach (var item in aList)
-            {
-              var url = item.GetAttribute("href");
-              if (url != null && url.Contains("/fategrandorder/"))
-              {
-                url = url.Replace("/fategrandorder/", "");
-              }
-              else
-              {
-                url = url.Replace("fategrandorder/", "");
-              }
-              var rarity = item.GetAttribute("data-rarity");
-              var name = imgList[num].GetAttribute("alt");
-              num++;
-
-              // メカエリIIはIとURLが同じでIDがかぶるのでスキップ
-              if (name == "メカエリチャンⅡ号機") continue;
-              // 哪吒は文字化けするのでひらがなにする
-              if (name == "哪吒") name = "なた";
-
-              // リストに追加
-              if (url != null && rarity != null && name != null)
-              {
-                servantList.Add(new ServantModel()
-                {
-                  Id = int.Parse(url),
-                  Rarity = int.Parse(rarity),
-                  Type = ColorToAChara(item.GetAttribute("data-type")),
-                  Class = ClassToKanji(item.GetAttribute("data-class")),
-                  Range = RangeToAChara(item.GetAttribute("data-range")),
-                  Name = name.Replace("<br>", ""),
-                  AppMediaOrbit = RankToInt(dataRank),
-                });
-              }
-            }
-          }
-        }
+        // 周回サポランクテーブル取得
+        InsertOrbitRank(
+          servantList,
+          appMediaDoc.QuerySelectorAll("#servant_ranking_orbit_supporter > table > tbody > tr")
+        );
 
         // 攻略ランクテーブル取得
-        var rateTable = appMediaDoc.QuerySelectorAll("#servant_ranking_rate > table > tbody > tr");
+        var rateTable = appMediaDoc.QuerySelectorAll("#servant_ranking_difficulty_supporter > table > tbody > tr");
         foreach (var rateRow in rateTable)
         {
           // data-tagに値が入っていたらラベルなのでスキップ
@@ -167,52 +126,106 @@ namespace FGORankGenerator.Models
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="servantList"></param>
+    /// <param name="orbitTable"></param>
+    /// <returns></returns>
+    private static List<ServantModel> InsertOrbitRank(List<ServantModel> servantList, IHtmlCollection<IElement> orbitTable)
+    {
+      foreach (var orbitRow in orbitTable)
+      {
+        // data-tagに値が入っていたらラベルなのでスキップ
+        string? dataTag = orbitRow.GetAttribute("data-tag");
+        if (dataTag == null)
+        {
+          // 周回ランクを保持
+          var dataRank = orbitRow.GetAttribute("data-rank");
+
+          // 中身を再解析
+          var parser = new HtmlParser();
+          IHtmlDocument rowDoc = parser.ParseDocument(orbitRow.InnerHtml);
+
+          // aタグから鯖URL・レア度・タイプ・クラス・範囲を取得
+          var aList = rowDoc.QuerySelectorAll("a");
+          // imgタグから鯖名を取得
+          var imgList = rowDoc.QuerySelectorAll("img");
+          int num = 0;
+
+          foreach (var item in aList)
+          {
+            var url = item.GetAttribute("href");
+            if (url != null && url.Contains("/fategrandorder/"))
+            {
+              url = url.Replace("/fategrandorder/", "");
+            }
+            else
+            {
+              url = url.Replace("fategrandorder/", "");
+            }
+            var rarity = item.GetAttribute("data-rarity");
+            var name = imgList[num].GetAttribute("alt");
+            num++;
+
+            // メカエリIIはIとURLが同じでIDがかぶるのでスキップ
+            if (name == "メカエリチャンⅡ号機") continue;
+            // 哪吒は文字化けするのでひらがなにする
+            if (name == "哪吒") name = "なた";
+
+            // リストに追加
+            if (url != null && rarity != null && name != null)
+            {
+              servantList.Add(new ServantModel()
+              {
+                Id = int.Parse(url),
+                Rarity = int.Parse(rarity),
+                Type = ColorToAChara(item.GetAttribute("data-type")),
+                Class = ClassToKanji(item.GetAttribute("data-class")),
+                Range = RangeToAChara(item.GetAttribute("data-range")),
+                Name = name.Replace("<br>", ""),
+                AppMediaOrbit = RankToInt(dataRank),
+              });
+            }
+          }
+        }
+      }
+      return servantList;
+    }
+
+    /// <summary>
     /// ランクに応じた数値を返します。
     /// </summary>
     private static int RankToInt(string? rankStr)
     {
-      int rankInt;
       switch (rankStr)
       {
-        case "EX":
-          rankInt = 10;
-          break;
         case "SSS":
-          rankInt = 10;
-          break;
+          return 11;
         case "SS":
-          rankInt = 9;
-          break;
+          return 10;
+        case "EX":
+          return 10;
+        case "S+":
+          return 9;
         case "S":
-          rankInt = 8;
-          break;
+          return 8;
         case "A+":
-          rankInt = 7;
-          break;
+          return 7;
         case "A":
-          rankInt = 6;
-          break;
+          return 6;
         case "B+":
-          rankInt = 6;
-          break;
+          return 5;
         case "B":
-          rankInt = 5;
-          break;
+          return 4;
         case "C+":
-          rankInt = 4;
-          break;
+          return 3;
         case "C":
-          rankInt = 3;
-          break;
+          return 2;
         case "D":
-          rankInt = 2;
-          break;
+          return 1;
         default:
-          rankInt = 1;
-          break;
+          return 0;
       }
-
-      return rankInt;
     }
 
     /// <summary>

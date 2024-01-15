@@ -4,6 +4,8 @@ using System.Text;
 using FGORankGenerator.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 
 namespace FGORankGenerator.Controllers
 {

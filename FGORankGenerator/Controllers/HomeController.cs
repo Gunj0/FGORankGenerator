@@ -18,6 +18,7 @@ namespace FGORankGenerator.Controllers
       _logger = logger;
     }
 
+    [HttpGet]
     public IActionResult Index()
     {
       var servantList = Scraping.GetServantData();
@@ -25,11 +26,13 @@ namespace FGORankGenerator.Controllers
       return View("Index", servantList);
     }
 
+    [HttpGet]
     public IActionResult Contact()
     {
       return View();
     }
 
+    [HttpGet]
     public IActionResult CsvDownload(string download)
     {
       if (download == "download")
@@ -48,6 +51,7 @@ namespace FGORankGenerator.Controllers
       return View();
     }
 
+    [HttpGet]
     public IActionResult GetLatestData(string getData)
     {
       if (getData == "getData")
@@ -62,7 +66,9 @@ namespace FGORankGenerator.Controllers
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-      return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+      return View(new ErrorViewModel { 
+        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+      });
     }
   }
 }

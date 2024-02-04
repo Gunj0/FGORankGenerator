@@ -1,48 +1,67 @@
-name: .NET Core アプリケーションを構築して Web アプリ FGORankGenerator にデプロイする
+name: Build and deploy .NET App
+
 on:
   push:
     branches:
     - master
+  workflow_dispatch:
+
 env:
   AZURE_WEBAPP_NAME: FGORankGenerator
   AZURE_WEBAPP_PACKAGE_PATH: FGORankGenerator\published
   CONFIGURATION: Release
-  DOTNET_CORE_VERSION: 6.0.x
+  DOTNET_CORE_VERSION: '6.0.x'
   WORKING_DIRECTORY: FGORankGenerator
+
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
     - uses: actions/checkout@v4
+
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
     - name: Restore
       run: dotnet restore "FGORankGenerator\FGORankGenerator.csproj"
+
     - name: Build
       run: dotnet build "FGORankGenerator\FGORankGenerator.csproj" --configuration ${{ env.CONFIGURATION }} --no-restore
+
     - name: Test
       run: dotnet test "FGORankGenerator\FGORankGenerator.csproj" --no-build
+
     - name: Publish
       run: dotnet publish "FGORankGenerator\FGORankGenerator.csproj" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+
     - name: Publish Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
   deploy:
     runs-on: windows-latest
     needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write #This is required for requesting the JWT
+
     steps:
     - name: Download artifact from build job
       uses: actions/download-artifact@v3
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.FGORankGenerator_F0AC }}
+        publish-profile: ${{ secrets.FGORANKGENERATOR_F0AC }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}

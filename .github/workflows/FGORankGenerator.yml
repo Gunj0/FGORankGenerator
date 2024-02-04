@@ -8,7 +8,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: FGORankGenerator
-  AZURE_WEBAPP_PACKAGE_PATH: FGORankGenerator\published
+  AZURE_WEBAPP_PACKAGE_PATH: FGORankGenerator\myapp
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: '6.0.x'
   WORKING_DIRECTORY: FGORankGenerator
@@ -60,8 +60,8 @@ jobs:
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
     - name: Deploy to Azure WebApp
-      uses: azure/webapps-deploy@v2
+      uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.FGORANKGENERATOR_F0AC }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}

@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\images\kurage.png" />
+    <Content Remove="wwwroot\js\site.js" />
+    <Content Remove="wwwroot\js\site.js.map" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +19,10 @@
 
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.17.1" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.3.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

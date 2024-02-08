@@ -19,6 +19,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
+    - name: npm ci
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+
+    - run: npm ci
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
@@ -28,8 +35,6 @@ jobs:
     - name: Restore
       run: dotnet restore "FGORankGenerator\FGORankGenerator.csproj"
       
-    - name: NPM•œŒ³
-      run: npm install
 
     - name: Build
       run: dotnet build "FGORankGenerator\FGORankGenerator.csproj" --configuration ${{ env.CONFIGURATION }} --no-restore

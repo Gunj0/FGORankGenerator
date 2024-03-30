@@ -4,17 +4,20 @@ using AngleSharp.Dom;
 
 namespace FGORankGenerator.Models
 {
+  /// <summary>
+  /// スクレイピングしてサーヴァントテーブルを作成する。
+  /// </summary>
   public static class Scraping
   {
     // 周回ランクと攻略ランクの合計最高ポイント
     private const double MAX_SERVANT_SCORE = 21.0; // SSS + SS
 
+    // AppMediaのURL
+    private const string URL_APPMEDIA = "https://appmedia.jp/fategrandorder/1351236";
+
     // HttpClientは1つを使い回す必要がある
     private static readonly HttpClient _httpClient
-      = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
-
-    // AppMedia URL
-    private const string _appMediaURL = "https://appmedia.jp/fategrandorder/1351236";
+      = new() { Timeout = TimeSpan.FromSeconds(10) };
 
     /// <summary>
     /// スクレイピングしたサーヴァント評価リストを返します。
@@ -24,7 +27,7 @@ namespace FGORankGenerator.Models
       var servantList = new List<ServantModel>();
 
       // AppMediaのHTML解析
-      IHtmlDocument? appMediaDoc = GetParseHtml(_appMediaURL).Result;
+      IHtmlDocument? appMediaDoc = GetParseHtml(URL_APPMEDIA).Result;
 
       if (appMediaDoc != null)
       {
@@ -104,7 +107,8 @@ namespace FGORankGenerator.Models
         // 総合ランクを挿入
         foreach (var item in servantList)
         {
-          item.OverallRank = (item.AppMediaRate + item.AppMediaOrbit) / MAX_SERVANT_SCORE * 10.0;
+          item.OverallRank =
+            item.AppMediaRate > item.AppMediaOrbit ? item.AppMediaRate : item.AppMediaOrbit;
         }
 
         // 総合ランクで降順ソート
@@ -182,7 +186,7 @@ namespace FGORankGenerator.Models
             }
             else
             {
-              url = url.Replace("fategrandorder/", "");
+              url = url!.Replace("fategrandorder/", "");
             }
             // レア度取得
             var rarity = item.GetAttribute("data-rarity");
@@ -262,18 +266,18 @@ namespace FGORankGenerator.Models
     {
       return rankStr switch
       {
-        "SSS" => 11,
-        "SS" => 10,
-        "EX" => 10,
-        "S+" => 9,
-        "S" => 8,
-        "A+" => 7,
-        "A" => 6,
-        "B+" => 5,
-        "B" => 4,
-        "C+" => 3,
-        "C" => 2,
-        "D" => 1,
+        "SSS" => 10,
+        "SS" => 9,
+        "EX" => 9,
+        "S+" => 8,
+        "S" => 7,
+        "A+" => 6,
+        "A" => 5,
+        "B+" => 4,
+        "B" => 3,
+        "C+" => 2,
+        "C" => 1,
+        "D" => 0,
         _ => 0,
       };
     }

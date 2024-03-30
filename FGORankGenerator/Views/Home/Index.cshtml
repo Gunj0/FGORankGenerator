@@ -9,7 +9,7 @@
     10段階サーヴァント評価をリアルタイム更新！
   </p>
   <p class="message">
-    クリックで所持チェックが保存可能です
+    クリックで所持チェックなども保存できます。
   </p>
   <p class="link">
     参考：<a href="https://appmedia.jp/fategrandorder/1351236" target="_blank">AppMedia様</a>
@@ -42,7 +42,7 @@
       <th scope="col">星 </th>
       <th scope="col">級</th>
       <th scope="col">色</th>
-      <th scope="col">範</th>
+      <th scope="col">種</th>
       <th scope="col">周</th>
       <th scope="col">攻</th>
       <th scope="col">総</th>
@@ -64,7 +64,7 @@
         @{
           var overallRank = "";
           var hoge = servant.OverallRank;
-          if (hoge >= 10)
+          if (hoge >= 0)
           {
             overallRank = hoge.ToString("F0");
           }

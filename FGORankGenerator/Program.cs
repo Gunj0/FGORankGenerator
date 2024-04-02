@@ -32,7 +32,7 @@ namespace FGORankGenerator
           name: "default",
           pattern: "{controller=Home}/{action=Index}/{id?}");
 
-      BuildDB();
+      //BuildDB();
 
       app.Run();
     }

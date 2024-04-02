@@ -1,5 +1,3 @@
-using FGORankGenerator.Models;
-
 namespace FGORankGenerator
 {
   public class Program
@@ -32,30 +30,7 @@ namespace FGORankGenerator
           name: "default",
           pattern: "{controller=Home}/{action=Index}/{id?}");
 
-      //BuildDB();
-
       app.Run();
-    }
-
-    static private void BuildDB()
-    {
-      using var db = new ServantContext();
-
-      Console.WriteLine($"Database path: {db.DbPath}.");
-
-      // Create
-      Console.WriteLine("Inserting a new servant");
-      db.Add(new Servant { Name = "test1" });
-      db.Add(new Servant { Name = "test2" });
-      db.SaveChanges();
-
-      // Read
-      Console.WriteLine("Querying for a blog");
-      var servant = db.Servants
-          .OrderBy(b => b.Id)
-          .First();
-      Console.WriteLine($"1: {servant.Name}");
-
     }
   }
 }
